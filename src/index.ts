@@ -312,7 +312,7 @@ const fastify = Fastify({
 
 await fastify.register(fastifyStatic, {
   root: path.join(global.projectRoot, "public"),
-  prefix: "/public/",
+  prefix: "/dvd/public/",
 });
 await fastify.register(fastifyView, {
   engine: { ejs },
@@ -320,12 +320,12 @@ await fastify.register(fastifyView, {
 });
 await fastify.register(fastifyWebsocket);
 
-fastify.get("/", async (req: FastifyRequest, reply) => {
+fastify.get("/dvd", async (req: FastifyRequest, reply) => {
   return reply.view("index.ejs");
 });
 
 fastify.get(
-  "/ws/game",
+  "/dvd/ws/game",
   { websocket: true },
   (connection, req: FastifyRequest) => {
     const ws: WebSocket = connection;
