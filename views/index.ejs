@@ -415,14 +415,25 @@
                 this.board = { width: 800, height: 600 };
                 this.ping = 0;
                 this.lastPingTime = 0;
-                this.playerJoinTimes = new Map();
                 this.lastUpdateTime = Date.now();
+
+                this.joinBtn = document.getElementById('joinBtn');
+                this.nicknameInput = document.getElementById('nickname');
+                this.colorInput = document.getElementById('color');
+                this.spectatorNotice = document.getElementById('spectatorNotice');
+                this.playtimeDisplay = document.getElementById('playtimeDisplay');
+                this.playtimeValue = document.getElementById('playtimeValue');
 
                 this.initializeUI();
                 this.connect();
                 this.startPingLoop();
                 this.startRenderLoop();
                 this.startClientPrediction();
+                
+                this.logoImageLoaded = false;
+                this.logoImage = new Image();
+                this.logoImage.onload = () => { this.logoImageLoaded = true; }
+                this.logoImage.src = '/public/img/DVD_logo.svg';
             }
 
             startClientPrediction() {
@@ -482,24 +493,30 @@
                     nouns[Math.floor(Math.random() * nouns.length)] +
                     Math.floor(Math.random() * 999);
 
-                document.getElementById('nickname').value = randomNick;
+                this.nicknameInput.value = randomNick;
 
                 // Generate random color
                 const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd'];
-                document.getElementById('color').value = colors[Math.floor(Math.random() * colors.length)];
+                this.colorInput.value = colors[Math.floor(Math.random() * colors.length)];
 
                 // Event listeners
-                document.getElementById('joinBtn').addEventListener('click', () => {
+                this.joinBtn.onclick = () => {
                     if (this.isPlayer) {
                         this.leaveGame();
                     } else {
                         this.joinGame();
                     }
-                });
+                };
+
+                this.colorInput.oninput = () => {
+                    if (this.isPlayer) {
+                        this.changeColor();
+                    }
+                }
 
                 // Resize canvas
                 this.resizeCanvas();
-                window.addEventListener('resize', () => this.resizeCanvas());
+                window.onresize = () => this.resizeCanvas();
             }
 
             resizeCanvas() {
@@ -549,7 +566,6 @@
                         this.myPlayerId = data.playerId;
                         this.board = data.board;
                         this.updatePlayersData(data.players);
-                        this.playerJoinTimes.set(this.myPlayerId, Date.now());
                         this.updateUI();
                         this.startPlaytimeTimer();
                         break;
@@ -565,14 +581,12 @@
                     case 'new_player':
                         // Add new player to existing players
                         this.players.set(data.player.id, data.player);
-                        this.playerJoinTimes.set(data.player.id, Date.now());
                         this.updatePlayerList();
                         break;
 
                     case 'player_left':
                         // Remove player who left
                         this.players.delete(data.playerId);
-                        this.playerJoinTimes.delete(data.playerId);
                         this.updatePlayerList();
                         break;
 
@@ -588,8 +602,7 @@
             }
 
             updatePlayersData(playersArray) {
-                let playersChanged = false;
-                let cornerCountsChanged = false;
+                let shouldUpdatePlayerList = false;
 
                 // Update existing players with new data, preserving cached properties
                 playersArray.forEach(playerUpdate => {
@@ -597,7 +610,11 @@
                     if (existingPlayer) {
                         // Check if corner count actually changed (only if it's in the update)
                         if ('cornerHits' in playerUpdate && playerUpdate.cornerHits !== existingPlayer.cornerHits) {
-                            cornerCountsChanged = true;
+                            shouldUpdatePlayerList = true;
+                        }
+
+                        if ('color' in playerUpdate) {
+                            shouldUpdatePlayerList = true;
                         }
 
                         // Server data is authoritative - completely replace predicted values
@@ -616,8 +633,7 @@
                     } else {
                         // New player - add to map and track join time
                         this.players.set(playerUpdate.id, playerUpdate);
-                        this.playerJoinTimes.set(playerUpdate.id, Date.now());
-                        playersChanged = true;
+                        shouldUpdatePlayerList = true;
                     }
                 });
 
@@ -627,13 +643,12 @@
                     if (!currentPlayerIds.has(playerId)) {
                         const playerName = this.players.get(playerId)?.nickname || 'Unknown';
                         this.players.delete(playerId);
-                        this.playerJoinTimes.delete(playerId);
-                        playersChanged = true;
+                        shouldUpdatePlayerList = true;
                     }
                 }
 
                 // Only re-render player list if something that affects it changed
-                if (playersChanged || cornerCountsChanged) {
+                if (shouldUpdatePlayerList) {
                     this.updatePlayerList();
                 }
             }
@@ -651,8 +666,6 @@
                 }
 
                 listContent.innerHTML = playersArray.map(player => {
-                    const joinTime = this.playerJoinTimes.get(player.id) || Date.now();
-                    const playTime = this.formatTime(Date.now() - joinTime);
                     const isOwnPlayer = player.id === this.myPlayerId;
 
                     return `
@@ -679,34 +692,27 @@
             }
 
             updateUI() {
-                const joinBtn = document.getElementById('joinBtn');
-                const nicknameInput = document.getElementById('nickname');
-                const colorInput = document.getElementById('color');
-                const spectatorNotice = document.getElementById('spectatorNotice');
-                const playtimeDisplay = document.getElementById('playtimeDisplay');
-
                 if (this.isPlayer) {
-                    joinBtn.textContent = 'Leave Game';
-                    joinBtn.className = 'join-btn leave';
-                    nicknameInput.disabled = true;
-                    colorInput.disabled = true;
-                    spectatorNotice.style.display = 'none';
-                    playtimeDisplay.style.display = 'block';
+                    this.joinBtn.textContent = 'Leave Game';
+                    this.joinBtn.className = 'join-btn leave';
+                    this.nicknameInput.disabled = true;
+                    this.spectatorNotice.style.display = 'none';
+                    this.playtimeDisplay.style.display = 'block';
                 } else {
-                    joinBtn.textContent = 'Join Game';
-                    joinBtn.className = 'join-btn';
-                    nicknameInput.disabled = false;
-                    colorInput.disabled = false;
-                    spectatorNotice.style.display = 'block';
-                    playtimeDisplay.style.display = 'none';
+                    this.joinBtn.textContent = 'Join Game';
+                    this.joinBtn.className = 'join-btn';
+                    this.nicknameInput.disabled = false;
+                    this.spectatorNotice.style.display = 'block';
+                    this.playtimeDisplay.style.display = 'none';
                 }
             }
 
             startPlaytimeTimer() {
                 this.playtimeStart = Date.now();
+                this.playtimeValue.textContent = this.formatTime(0);
                 this.playtimeInterval = setInterval(() => {
                     const elapsed = Date.now() - this.playtimeStart;
-                    document.getElementById('playtimeValue').textContent = this.formatTime(elapsed);
+                    this.playtimeValue.textContent = this.formatTime(elapsed);
                 }, 1000);
             }
 
@@ -730,8 +736,8 @@
             }
 
             joinGame() {
-                const nickname = document.getElementById('nickname').value.trim();
-                const color = document.getElementById('color').value;
+                const nickname = this.nicknameInput.value.trim();
+                const color = this.colorInput.value;
 
                 if (!nickname) {
                     alert('Please enter a nickname');
@@ -751,6 +757,17 @@
                 if (this.ws && this.ws.readyState === WebSocket.OPEN) {
                     this.ws.send(JSON.stringify({
                         type: 'leave'
+                    }));
+                }
+            }
+
+            changeColor() {
+                const color = this.colorInput.value;
+
+                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                    this.ws.send(JSON.stringify({
+                        type: 'new_color',
+                        color: color
                     }));
                 }
             }
@@ -801,11 +818,6 @@
                 this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
                 this.ctx.fillRect(0, 0, this.board.width, this.board.height);
 
-                // Draw board border
-                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-                this.ctx.lineWidth = 2 / scale;
-                this.ctx.strokeRect(0, 0, this.board.width, this.board.height);
-
                 // Draw players
                 for (const player of this.players.values()) {
                     // Skip if player data is incomplete
@@ -824,26 +836,53 @@
                     const playerWidth = player.size.x || 20;
                     const playerHeight = player.size.y || 20;
 
-                    this.ctx.fillRect(
-                        player.pos.x - playerWidth / 2,
-                        player.pos.y - playerHeight / 2,
-                        playerWidth,
-                        playerHeight
-                    );
-
+                    if (this.logoImageLoaded) {
+                        this.ctx.drawImage(
+                            this.drawImageColored(this.logoImage, player.color),
+                            player.pos.x - playerWidth / 2,
+                            player.pos.y - playerHeight / 2,
+                            playerWidth,
+                            playerHeight
+                        );
+                    }
+                    
                     // Draw nickname
                     this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                    this.ctx.font = `${12 / scale}px Nunito`;
+                    this.ctx.font = `${14 / scale}px Nunito`;
                     this.ctx.textAlign = 'center';
                     this.ctx.shadowBlur = 0;
                     this.ctx.fillText(
                         player.nickname || 'Unknown',
                         player.pos.x,
-                        player.pos.y - playerHeight / 2 - 8 / scale
+                        player.pos.y - playerHeight / 2 - 16 / scale
                     );
                 }
 
+                // Draw board border
+                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                this.ctx.lineWidth = 2 / scale;
+                this.ctx.strokeRect(0, 0, this.board.width, this.board.height);
+                
                 this.ctx.restore();
+            }
+
+            drawImageColored(image, color) {
+                const w = image.width;
+                const h = image.height;
+                const off = new OffscreenCanvas(w, h);
+                const ctx = off.getContext('2d');
+
+                ctx.clearRect(0, 0, w, h);
+                ctx.drawImage(image, 0, 0, w, h);
+
+                ctx.globalCompositeOperation = 'multiply';
+                ctx.fillStyle = color;
+                ctx.fillRect(0, 0, w, h);
+
+                ctx.globalCompositeOperation = 'destination-in';
+                ctx.drawImage(image, 0, 0, w, h);
+
+                return off;
             }
         }
 

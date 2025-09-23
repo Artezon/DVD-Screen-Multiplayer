@@ -4,8 +4,8 @@ const config = {
   tickRate: 20,
   boardWidth: 1280,
   boardHeight: 720,
-  playerWidth: 300,
-  playerHeight: 200,
+  playerWidth: 340,
+  playerHeight: 150,
   playerSpeed: 250,
 };
 

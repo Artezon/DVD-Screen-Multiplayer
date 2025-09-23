@@ -34,7 +34,7 @@ class Player {
   public id: string;
   public board: Game;
   public nickname: string;
-  public color: string;
+  public _color: string;
   public pos: Point2D;
   private _angle: number;
   private _scale: number;
@@ -57,7 +57,7 @@ class Player {
     this.id = randomUUID();
     this.board = board;
     this.nickname = nickname;
-    this.color = color;
+    this._color = color;
     this.sendData = {};
     this.pos = new Point2D(x, y);
     this.velocity = new Point2D();
@@ -74,6 +74,14 @@ class Player {
   private setVelocity(): void {
     this.velocity.x = this._speed * Math.cos(radians(this._angle));
     this.velocity.y = this._speed * Math.sin(radians(this._angle));
+  }
+
+  public get color() {
+    return this._color;
+  }
+  public set color(color: string) {
+    this._color = color;
+    this.sendData.color = this._color;
   }
 
   public get speed() {
@@ -100,8 +108,13 @@ class Player {
   public set scale(multiplier: number) {
     if (multiplier > 0 && multiplier <= 100) {
       this._scale = multiplier;
-      this._size.x = this.board.basePlayerWidth;
-      this._size.y = this.board.basePlayerHeight;
+      this._size.x =
+        this.board.basePlayerWidth * this.board.globalPlayerScale * this._scale;
+      this._size.y =
+        this.board.basePlayerHeight *
+        this.board.globalPlayerScale *
+        this._scale;
+
       this.sendData.size = this.size;
     }
   }
@@ -167,6 +180,7 @@ class Game {
   public height: number;
   public basePlayerWidth: number;
   public basePlayerHeight: number;
+  public globalPlayerScale: number;
   public defaultSpeed: number;
   public cornerTolerance: number;
   public players: Map<string, Player>;
@@ -185,6 +199,7 @@ class Game {
     this.height = height;
     this.basePlayerWidth = basePlayerWidth;
     this.basePlayerHeight = basePlayerHeight;
+    this.globalPlayerScale = 1;
     this.defaultSpeed = defaultSpeed;
     this.cornerTolerance = 3;
 
@@ -193,23 +208,31 @@ class Game {
   }
 
   public addPlayer(nickname: string, color: string): Player {
-    const scale: number = 0.8 + Math.random() * 0.4;
-    const w: number = this.basePlayerWidth * scale;
-    const h: number = this.basePlayerHeight * scale;
-    const x: number =
-      this.width * 0.05 + w / 2 + Math.random() * (this.width * 0.9 - w / 2);
-    const y: number =
-      this.height * 0.05 + h / 2 + Math.random() * (this.height * 0.9 - h / 2);
+    this.setGlobalPlayerScale(1 / (1 + 0.1 * this.players.size));
+
+    const w: number = this.basePlayerWidth * this.globalPlayerScale;
+    const h: number = this.basePlayerHeight * this.globalPlayerScale;
+    const x: number = this.width * 0.05 + w / 2 + Math.random() * (this.width * 0.9 - w / 2);
+    const y: number = this.height * 0.05 + h / 2 + Math.random() * (this.height * 0.9 - h / 2);
     const angle: number = Math.floor(Math.random() * 4) * 90 + 45;
     const speed: number = this.defaultSpeed * (0.8 + Math.random() * 0.4);
 
-    const player = new Player(this, nickname, color, x, y, angle, scale, speed);
+    const player = new Player(this, nickname, color, x, y, angle, 1, speed);
     this.players.set(player.id, player);
     return player;
   }
 
   public removePlayer(id: string): void {
     this.players.delete(id);
+
+    this.setGlobalPlayerScale(1 / (1 + 0.1 * this.players.size));
+  }
+
+  public setGlobalPlayerScale(scale: number): void {
+    this.globalPlayerScale = scale;
+    for (const player of this.players.values()) {
+      player.scale = player.scale;
+    }
   }
 
   public update(dt: number): void {
@@ -218,8 +241,6 @@ class Game {
     this.messageToClients.players = [];
 
     for (const player of this.players.values()) {
-      player.sendData = {};
-
       player.move(dt);
     }
 
@@ -236,6 +257,7 @@ class Game {
       player.sendData.velocity = player.velocity;
       player.sendData.id = player.id;
       this.messageToClients.players.push(player.sendData);
+      player.sendData = {};
     }
   }
 
@@ -450,6 +472,13 @@ fastify.get(
                 },
               })
             );
+          }
+        }
+
+        if (data.type === "new_color") {
+          if (client.playerId) {
+            const player = game.players.get(client.playerId);
+            if (player) player.color = data.color;
           }
         }
 
