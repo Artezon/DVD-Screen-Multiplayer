@@ -1,4 +1,4 @@
-import Fastify, { FastifyInstance } from "fastify";
+import Fastify from "fastify";
 import path from "path";
 import { fileURLToPath } from "url";
 import { randomUUID } from "crypto";

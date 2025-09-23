@@ -1,6 +1,6 @@
 const config = {
-  host: "0.0.0.0",
-  port: 1234,
+  host: process.env.HOST || "localhost",
+  port: parseInt(process.env.PORT || "1234"),
   tickRate: 20,
   boardWidth: 1280,
   boardHeight: 720,
