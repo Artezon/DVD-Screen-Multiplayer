@@ -504,6 +504,7 @@
                     if (this.isPlayer) {
                         this.leaveGame();
                     } else {
+                        this.joinBtn.disabled = true;
                         this.joinGame();
                     }
                 };
@@ -568,6 +569,7 @@
                         this.updatePlayersData(data.players);
                         this.updateUI();
                         this.startPlaytimeTimer();
+                        this.joinBtn.disabled = false;
                         break;
 
                     case 'spectator_mode':
@@ -576,6 +578,7 @@
                         this.updatePlayersData(data.players);
                         this.updateUI();
                         this.stopPlaytimeTimer();
+                        this.joinBtn.disabled = false;
                         break;
 
                     case 'new_player':

@@ -365,12 +365,16 @@ fastify.get(
       })
     );
 
+    console.log(`Client ${clientId} connected`);
+
     ws.on("message", (msg: WebSocket.Data) => {
       try {
         const data = JSON.parse(msg.toString());
 
         if (data.type === "join" && data.nickname && data.color) {
-          // Convert spectator to player
+          // If client is already a player (fix players-ghosts)
+          if (!client.isSpectator || client.playerId) return;
+          
           const player = game.addPlayer(data.nickname, data.color);
           client.playerId = player.id;
           client.isSpectator = false;
@@ -423,11 +427,15 @@ fastify.get(
               otherClient.ws.send(JSON.stringify(newPlayerData));
             }
           }
+
+          console.log(`${data.nickname} joined tha game`)
         }
 
         if (data.type === "leave") {
           // Convert player back to spectator
           if (client.playerId) {
+            console.log(`${game.players.get(client.playerId)?.nickname} left tha game`);
+            
             game.removePlayer(client.playerId);
 
             // Broadcast player left to all other clients
@@ -495,14 +503,15 @@ fastify.get(
         game.removePlayer(client.playerId);
       }
       clients.delete(clientId);
+      console.log(`Client ${clientId} disconnected (connection closed)`);
     });
 
     ws.on("error", (error) => {
-      console.error("WebSocket error:", error);
       if (client.playerId) {
         game.removePlayer(client.playerId);
       }
       clients.delete(clientId);
+      console.log(`Client ${clientId} disconnected (WebSocket error: ${error})`);
     });
   }
 );
