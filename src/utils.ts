@@ -1,8 +1,6 @@
-/**
- * Convert degrees to radians
- * @param degrees - Angle in degrees
- * @returns Angle in radians
- */
-export function radians(degrees: number): number {
-  return degrees * (Math.PI / 180);
-}
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
+
+export const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+
+export const radians = (degrees: number): number => degrees * (Math.PI / 180);

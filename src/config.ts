@@ -6,7 +6,9 @@ const config = {
   boardHeight: 720,
   playerWidth: 340,
   playerHeight: 150,
+  globalPlayerScale: 1,
   playerSpeed: 250,
+  cornerTolerance: 5,
 };
 
 export default config;
