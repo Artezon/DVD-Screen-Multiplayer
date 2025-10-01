@@ -17,7 +17,6 @@ export function startGameLoop(game: Game, clients: Map<string, Client>): void {
     last = now;
     game.update(dt);
 
-    // Send updates to all connected clients (players and spectators)
     for (const [clientId, client] of clients.entries()) {
       if (client.ws.readyState !== WebSocket.OPEN) {
         // Clean up disconnected clients
@@ -28,8 +27,10 @@ export function startGameLoop(game: Game, clients: Map<string, Client>): void {
         continue;
       }
 
-      // Send game state to all clients (both players and spectators)
-      client.ws.send(JSON.stringify(game.messageToClients));
+      if (game.players.size > 0) {
+        // Send updates to all connected clients (players and spectators)
+        client.ws.send(JSON.stringify(game.messageToClients));
+      }
     }
   }
 

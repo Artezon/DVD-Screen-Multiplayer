@@ -219,13 +219,7 @@ class GameClient {
         break;
 
       case "spectator_mode":
-        this.isPlayer = false;
-        this.myPlayerId = null;
-        this.players.delete(data.playerId);
-        this.updateUI();
-        this.stopPlaytimeTimer();
-        this.updatePlayerList();
-        this.joinBtn.disabled = false;
+        this.onLeave();
         break;
 
       case "new_player":
@@ -425,7 +419,6 @@ class GameClient {
       this.players.clear();
       this.ws = null;
       this.isPlayer = false;
-      this.players.delete(this.myPlayerId);
       this.myPlayerId = null;
       this.updateUI();
       this.stopPlaytimeTimer();
@@ -455,12 +448,26 @@ class GameClient {
   }
 
   leaveGame() {
+    this.onLeave();
+
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(
         JSON.stringify({
           type: "leave",
         })
       );
+    }
+  }
+
+  onLeave() {
+    if (this.isPlayer) {
+      this.isPlayer = false;
+      this.players.delete(this.myPlayerId);
+      this.myPlayerId = null;
+      this.updateUI();
+      this.stopPlaytimeTimer();
+      this.updatePlayerList();
+      this.joinBtn.disabled = false;
     }
   }
 
