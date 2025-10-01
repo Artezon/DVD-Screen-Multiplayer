@@ -9,6 +9,7 @@ class GameClient {
     this.board = { width: 0, height: 0 };
     this.ping = 0;
     this.lastUpdateTime = Date.now();
+    this.cursorTimeout = null;
 
     const urlParams = new URLSearchParams(window.location.search);
     this.hapticEnabled = urlParams.get("vibration") == "true";
@@ -156,9 +157,38 @@ class GameClient {
       setTimeout(() => this.resizeCanvas(), 5);
     };
 
+    document.onmousemove = () => this.resetCursorTimer();
+    document.onfullscreenchange = () => this.resetCursorTimer();
+
     // Resize canvas
     this.resizeCanvas();
     window.onresize = () => this.resizeCanvas();
+  }
+
+  showCursor() {
+    document.body.classList.remove("hide-cursor");
+  }
+
+  hideCursor() {
+    if (
+      document.fullscreenElement &&
+      !Array.from(document.querySelectorAll(".overlay-element")).some((el) =>
+        el.matches(":hover")
+      )
+    ) {
+      document.body.classList.add("hide-cursor");
+    }
+  }
+
+  resetCursorTimer() {
+    this.showCursor();
+    if (this.cursorTimeout) {
+      clearTimeout(this.cursorTimeout);
+    }
+
+    if (document.fullscreenElement) {
+      this.cursorTimeout = setTimeout(() => this.hideCursor(), 2000);
+    }
   }
 
   resizeCanvas() {
@@ -256,7 +286,25 @@ class GameClient {
         (Math.sign(this.prevVelX) !== Math.sign(playerUpdate.velocity.x) ||
           Math.sign(this.prevVelY) !== Math.sign(playerUpdate.velocity.y))
       ) {
-        navigator.vibrate(5, 10, 5, 10, 5, 10, 5, 10, 5, 10, 5, 10, 5, 10, 5, 10, 5);
+        navigator.vibrate(
+          5,
+          10,
+          5,
+          10,
+          5,
+          10,
+          5,
+          10,
+          5,
+          10,
+          5,
+          10,
+          5,
+          10,
+          5,
+          10,
+          5
+        );
       }
       this.prevVelX = playerUpdate.velocity.x;
       this.prevVelY = playerUpdate.velocity.y;
