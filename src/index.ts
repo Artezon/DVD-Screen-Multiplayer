@@ -27,14 +27,16 @@ export function startGameLoop(game: Game, clients: Map<string, Client>): void {
         continue;
       }
 
-      if (game.players.size > 0) {
+      if (game.players.size > 0 || lastPlayerCount > 0) {
         // Send updates to all connected clients (players and spectators)
         client.ws.send(JSON.stringify(game.messageToClients));
+        lastPlayerCount = game.players.size;
       }
     }
   }
 
   let last: number = Date.now();
+  let lastPlayerCount: number = 0;
   setInterval(gameLoop, 1000 / game.tickRate);
 }
 

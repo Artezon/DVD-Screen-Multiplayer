@@ -357,7 +357,6 @@ class GameClient {
     const currentPlayerIds = new Set(playersArray.map((p) => p.id));
     for (const [playerId] of this.players) {
       if (!currentPlayerIds.has(playerId)) {
-        const playerName = this.players.get(playerId)?.nickname || "Unknown";
         this.players.delete(playerId);
         shouldUpdatePlayerList = true;
       }
@@ -374,40 +373,49 @@ class GameClient {
     playersArray.sort((a, b) => (b.cornerHits || 0) - (a.cornerHits || 0));
 
     document.getElementById("playerCount").textContent =
-      `${playersArray.length} players`;
+      `${playersArray.length} player${playersArray.length != 1 ? "s" : ""}`;
 
     const listContent = document.getElementById("playerListContent");
+
+    listContent.innerText = "";
+
     if (playersArray.length === 0) {
-      listContent.innerHTML =
-        '<div style="text-align: center; opacity: 0.6; padding: 40px 0;">No players online</div>';
+      const noPlayersMessage = document.createElement("div");
+      noPlayersMessage.className = "no-players-msg";
+      noPlayersMessage.innerText = "No players online";
+      listContent.appendChild(noPlayersMessage);
       return;
     }
 
-    listContent.innerHTML = playersArray
-      .map((player) => {
-        const isOwnPlayer = player.id === this.myPlayerId;
+    playersArray.forEach((player) => {
+      const playerItem = document.createElement("div");
+      playerItem.className = "player-item";
+      if (player.id === this.myPlayerId) {
+        playerItem.classList.add("own-player");
+      }
 
-        return `
-                        <div class="player-item ${
-                          isOwnPlayer ? "own-player" : ""
-                        }">
-                            <div class="player-header">
-                                <div class="player-color" style="background-color: ${
-                                  player.color
-                                }"></div>
-                                <div class="player-name">${
-                                  player.nickname
-                                }</div>
-                            </div>
-                            <div style="font-size: 11px; opacity: 0.8; margin-top: 8px;">
-                                Corner hit count: <strong>${
-                                  player.cornerHits || 0
-                                }</strong>
-                            </div>
-                        </div>
-                    `;
-      })
-      .join("");
+      const playerHeader = document.createElement("div");
+      playerHeader.className = "player-list-header";
+      const playerColor = document.createElement("div");
+      playerColor.className = "player-color";
+      playerColor.style.backgroundColor = player.color;
+      const playerName = document.createElement("div");
+      playerName.className = "player-name";
+      playerName.innerText = player.nickname;
+      playerHeader.appendChild(playerColor);
+      playerHeader.appendChild(playerName);
+      const playerHitCount = document.createElement("div");
+      playerHitCount.className = "player-hit-count";
+      playerHitCount.innerText = "Corner hit count: ";
+      const playerHitCountNumber = document.createElement("strong");
+      playerHitCountNumber.innerText = player.cornerHits || 0;
+      playerHitCount.appendChild(playerHitCountNumber);
+
+      playerItem.appendChild(playerHeader);
+      playerItem.appendChild(playerHitCount);
+
+      listContent.appendChild(playerItem);
+    });
   }
 
   formatTime(milliseconds) {
@@ -479,6 +487,7 @@ class GameClient {
 
     if (!nickname) {
       alert("Please enter a nickname");
+      this.joinBtn.disabled = false;
       return;
     }
 
@@ -494,8 +503,6 @@ class GameClient {
   }
 
   leaveGame() {
-    this.onLeave();
-
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(
         JSON.stringify({

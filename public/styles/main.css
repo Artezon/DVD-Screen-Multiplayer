@@ -222,6 +222,12 @@ input[type="text"]:hover, input[type="color"]:hover {
     font-weight: 500;
 }
 
+.no-players-msg {
+    text-align: center;
+    opacity: 0.6;
+    padding: 40px 0;
+}
+
 .player-item {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -259,6 +265,15 @@ input[type="text"]:hover, input[type="color"]:hover {
     font-weight: 600;
     font-size: 14px;
     flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.player-hit-count {
+    font-size: 11px;
+    opacity: 0.8;
+    margin-top: 8px;
 }
 
 .corner-score {
