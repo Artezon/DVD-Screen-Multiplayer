@@ -173,7 +173,7 @@ class GameClient {
     if (
       document.fullscreenElement &&
       !Array.from(document.querySelectorAll(".overlay-element")).some((el) =>
-        el.matches(":hover")
+        el.matches(":hover"),
       )
     ) {
       document.body.classList.add("hide-cursor");
@@ -270,9 +270,8 @@ class GameClient {
 
       case "pong":
         this.ping = Date.now() - data.ts;
-        document.getElementById(
-          "pingDisplay"
-        ).textContent = `Ping: ${this.ping}ms`;
+        document.getElementById("pingDisplay").textContent =
+          `Ping: ${this.ping}ms`;
         break;
     }
   }
@@ -303,7 +302,7 @@ class GameClient {
           10,
           5,
           10,
-          5
+          5,
         );
       }
       this.prevVelX = playerUpdate.velocity.x;
@@ -374,9 +373,8 @@ class GameClient {
     const playersArray = Array.from(this.players.values());
     playersArray.sort((a, b) => (b.cornerHits || 0) - (a.cornerHits || 0));
 
-    document.getElementById(
-      "playerCount"
-    ).textContent = `${playersArray.length} players`;
+    document.getElementById("playerCount").textContent =
+      `${playersArray.length} players`;
 
     const listContent = document.getElementById("playerListContent");
     if (playersArray.length === 0) {
@@ -490,7 +488,7 @@ class GameClient {
           type: "join",
           nickname: nickname,
           color: color,
-        })
+        }),
       );
     }
   }
@@ -502,7 +500,7 @@ class GameClient {
       this.ws.send(
         JSON.stringify({
           type: "leave",
-        })
+        }),
       );
     }
   }
@@ -527,7 +525,7 @@ class GameClient {
         JSON.stringify({
           type: "new_color",
           color: color,
-        })
+        }),
       );
     }
   }
@@ -564,7 +562,7 @@ class GameClient {
           ? "No one is here :("
           : "Connecting to the server...",
         width / 2,
-        height / 2
+        height / 2,
       );
       return;
     }
@@ -616,7 +614,7 @@ class GameClient {
           player.pos.x - playerWidth / 2,
           player.pos.y - playerHeight / 2,
           playerWidth,
-          playerHeight
+          playerHeight,
         );
       }
 
@@ -630,7 +628,7 @@ class GameClient {
       this.ctx.fillText(
         player.nickname || "Unknown",
         player.pos.x,
-        player.pos.y - playerHeight / 2 - 20
+        player.pos.y - playerHeight / 2 - 20,
       );
     }
 

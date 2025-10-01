@@ -25,7 +25,7 @@ export class Player {
     y: number,
     angle: number = -45,
     scale: number,
-    speed: number
+    speed: number,
   ) {
     this.id = randomUUID();
     this.board = board;

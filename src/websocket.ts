@@ -27,7 +27,7 @@ function getAllPlayersInfo(game: Game): any[] {
 function broadcast(
   clients: Map<string, Client>,
   excludeClientId: string | null,
-  object: any
+  object: any,
 ) {
   for (const [otherClientId, otherClient] of clients.entries()) {
     if (
@@ -42,7 +42,7 @@ function broadcast(
 function cleanupClient(
   client: Client,
   clients: Map<string, Client>,
-  game: Game
+  game: Game,
 ) {
   if (client.playerId) {
     game.removePlayer(client.playerId);
@@ -59,11 +59,17 @@ function sendGameState(game: Game, ws: WebSocket) {
         width: game.width,
         height: game.height,
       },
-    })
+    }),
   );
 }
 
-function handlePlayerJoin(receivedData: any, client: Client, clients: Map<string, Client>, game: Game, ws: WebSocket) {
+function handlePlayerJoin(
+  receivedData: any,
+  client: Client,
+  clients: Map<string, Client>,
+  game: Game,
+  ws: WebSocket,
+) {
   // If client is already a player (fix players-ghosts)
   if (!client.isSpectator || client.playerId) return;
 
@@ -75,20 +81,25 @@ function handlePlayerJoin(receivedData: any, client: Client, clients: Map<string
     JSON.stringify({
       type: "player_init",
       player: serializePlayer(player),
-    })
+    }),
   );
 
   // Broadcast new player data to all other clients
   const newPlayerData = {
     type: "new_player",
-    player: serializePlayer(player)
+    player: serializePlayer(player),
   };
-  broadcast(clients, client.id, newPlayerData)
+  broadcast(clients, client.id, newPlayerData);
 
   console.log(`${receivedData.nickname} joined tha game`);
 }
 
-function handlePlayerLeave(client: Client, clients: Map<string, Client>, game: Game, ws: WebSocket) {
+function handlePlayerLeave(
+  client: Client,
+  clients: Map<string, Client>,
+  game: Game,
+  ws: WebSocket,
+) {
   // Convert player back to spectator
   if (client.playerId) {
     console.log(`${game.players.get(client.playerId)?.nickname} left tha game`);
@@ -98,9 +109,9 @@ function handlePlayerLeave(client: Client, clients: Map<string, Client>, game: G
     // Broadcast player left to all other clients
     const playerLeftData = {
       type: "player_left",
-      playerId: client.playerId
+      playerId: client.playerId,
     };
-    broadcast(clients, client.id, playerLeftData)
+    broadcast(clients, client.id, playerLeftData);
 
     client.playerId = undefined;
     client.isSpectator = true;
@@ -109,7 +120,7 @@ function handlePlayerLeave(client: Client, clients: Map<string, Client>, game: G
     ws.send(
       JSON.stringify({
         type: "spectator_mode",
-      })
+      }),
     );
   }
 }
@@ -157,7 +168,7 @@ function createGameWebSocketHandler(game: Game, clients: Map<string, Client>) {
     ws.on("error", (error) => {
       cleanupClient(client, clients, game);
       console.log(
-        `Client ${clientId} disconnected (WebSocket error: ${error})`
+        `Client ${clientId} disconnected (WebSocket error: ${error})`,
       );
     });
   };

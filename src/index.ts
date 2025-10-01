@@ -46,7 +46,7 @@ const game = new Game(
   config.playerHeight,
   config.globalPlayerScale,
   config.playerSpeed,
-  config.cornerTolerance
+  config.cornerTolerance,
 );
 
 const clients = new Map<string, Client>(); // all connected clients (both players and spectators)

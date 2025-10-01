@@ -12,7 +12,7 @@ export class Game {
     public basePlayerHeight: number,
     public globalPlayerScale: number,
     public defaultSpeed: number,
-    public cornerTolerance: number
+    public cornerTolerance: number,
   ) {
     this.players = new Map<string, Player>();
     this.messageToClients = {};
