@@ -147,7 +147,7 @@ input[type="text"]:hover, input[type="color"]:hover {
     flex: 1;
     background: rgba(0, 0, 0, 0.0);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    min-height: 200px;
+    min-height: 250px;
     padding: 0;
 }
 
@@ -330,12 +330,18 @@ body.hide-cursor {
 @media (max-width: 768px) {
     .container {
         flex-direction: column;
-        height: auto;
-        min-height: 100vh;
+    }
+
+    .left-panel {
+        flex: 0;
+    }
+
+    .game-area {
+        flex: 0;
     }
 
     .right-panel {
         width: 100%;
-        order: -1;
+        padding-bottom: 20px;
     }
 }

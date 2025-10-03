@@ -73,6 +73,54 @@ function handlePlayerJoin(
   // If client is already a player (fix players-ghosts)
   if (!client.isSpectator || client.playerId) return;
 
+  // If nickname is empty
+  if (!receivedData.nickname.trim()) {
+    ws.send(
+      JSON.stringify({
+        type: "error",
+        msg: "Please enter a nickname",
+      }),
+    );
+    return;
+  }
+
+  // If color is empty
+  if (!receivedData.color) {
+    ws.send(
+      JSON.stringify({
+        type: "error",
+        msg: "Please specify a color",
+      }),
+    );
+    return;
+  }
+
+  // If nickname already exists
+  if (
+    Array.from(game.players.values()).some(
+      (player) => player.nickname === receivedData.nickname,
+    )
+  ) {
+    ws.send(
+      JSON.stringify({
+        type: "error",
+        msg: "Your nickname is already taken",
+      }),
+    );
+    return;
+  }
+
+  // If nickname is too long
+  if (receivedData.nickname.length > 128) {
+    ws.send(
+      JSON.stringify({
+        type: "error",
+        msg: "Your nickname is too long!!",
+      }),
+    );
+    return;
+  }
+
   const player = game.addPlayer(receivedData.nickname, receivedData.color);
   client.playerId = player.id;
   client.isSpectator = false;
@@ -143,7 +191,7 @@ function createGameWebSocketHandler(game: Game, clients: Map<string, Client>) {
     ws.on("message", (msg: WebSocket.Data) => {
       try {
         const data = JSON.parse(msg.toString());
-        if (data.type === "join" && data.nickname && data.color) {
+        if (data.type === "join") {
           handlePlayerJoin(data, client, clients, game, ws);
         }
         if (data.type === "leave") {

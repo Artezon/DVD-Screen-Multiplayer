@@ -15,6 +15,9 @@ class GameClient {
     this.hapticEnabled = urlParams.get("vibration") == "true";
     this.prevVelX = null;
     this.prevVelY = null;
+    if (this.hapticEnabled && !("vibrate" in navigator)) {
+      this.hapticEnabled = false;
+    }
 
     this.joinBtn = document.getElementById("joinBtn");
     this.nicknameInput = document.getElementById("nickname");
@@ -192,13 +195,11 @@ class GameClient {
   }
 
   resizeCanvas() {
-    const container = this.canvas.parentElement;
-    const rect = container.getBoundingClientRect();
+    const rect = this.canvas.getBoundingClientRect();
 
     // Get device pixel ratio for sharp rendering on high-DPI displays
     const dpr = window.devicePixelRatio;
 
-    // Set actual canvas size (accounting for device pixel ratio)
     this.canvas.width = rect.width * dpr;
     this.canvas.height = rect.height * dpr;
   }
@@ -273,37 +274,23 @@ class GameClient {
         document.getElementById("pingDisplay").textContent =
           `Ping: ${this.ping}ms`;
         break;
+
+      case "error":
+        alert(data.msg);
+        this.joinBtn.disabled = false;
+        break;
     }
   }
 
   hapticFeedback(playerUpdate) {
     if (playerUpdate.id == this.myPlayerId) {
       if (
-        "vibrate" in navigator &&
         this.prevVelX != null &&
         this.prevVelY != null &&
         (Math.sign(this.prevVelX) !== Math.sign(playerUpdate.velocity.x) ||
           Math.sign(this.prevVelY) !== Math.sign(playerUpdate.velocity.y))
       ) {
-        navigator.vibrate(
-          5,
-          10,
-          5,
-          10,
-          5,
-          10,
-          5,
-          10,
-          5,
-          10,
-          5,
-          10,
-          5,
-          10,
-          5,
-          10,
-          5,
-        );
+        navigator.vibrate(5);
       }
       this.prevVelX = playerUpdate.velocity.x;
       this.prevVelY = playerUpdate.velocity.y;
@@ -313,11 +300,9 @@ class GameClient {
   updatePlayersData(playersArray) {
     let shouldUpdatePlayerList = false;
 
-    // Update existing players with new data, preserving cached properties
     playersArray.forEach((playerUpdate) => {
       const existingPlayer = this.players.get(playerUpdate.id);
       if (existingPlayer) {
-        // Check if corner count actually changed (only if it's in the update)
         if (
           "cornerHits" in playerUpdate &&
           playerUpdate.cornerHits !== existingPlayer.cornerHits
@@ -347,7 +332,6 @@ class GameClient {
         // Merge other properties (but only if they exist in the update)
         Object.assign(existingPlayer, playerUpdate);
       } else {
-        // New player - add to map and track join time
         this.players.set(playerUpdate.id, playerUpdate);
         shouldUpdatePlayerList = true;
       }
@@ -362,7 +346,6 @@ class GameClient {
       }
     }
 
-    // Only re-render player list if something that affects it changed
     if (shouldUpdatePlayerList) {
       this.updatePlayerList();
     }
@@ -484,12 +467,6 @@ class GameClient {
   joinGame() {
     const nickname = this.nicknameInput.value.trim();
     const color = this.colorInput.value;
-
-    if (!nickname) {
-      alert("Please enter a nickname");
-      this.joinBtn.disabled = false;
-      return;
-    }
 
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(
