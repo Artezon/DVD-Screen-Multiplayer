@@ -17,11 +17,11 @@ https://github.com/user-attachments/assets/4aa90c89-0cff-40f9-8617-b333a8cb4f0f
 <table>
   <tr>
     <td>Play on the main server</td>
-    <td><s>https://artezon.nya.pub/dvd</s> [server is offline, self-host instead]</td>
+    <td>https://dvd.up.railway.app/dvd</td>
   </tr>
   <tr>
     <td>Play with haptic feedback on bounce</td>
-    <td><s>https://artezon.nya.pub/dvd?vibration=true</s></td>
+    <td>https://dvd.up.railway.app/dvd?vibration=true</td>
   </tr>
   <tr>
     <td>My old pygame project (singleplayer)</td>
