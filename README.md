@@ -1,25 +1,27 @@
 <h2 align="center">✨ DVD Screen Multiplayer ✨</h2>
 
-Have you ever stared at a DVD screensaver, waiting for that perfect corner bounce? Well, this is yet another DVD screen simulator, but with a twist! Invite your friends to join, and each of you will have your own logo colliding with other ones, bouncing, and creating chaos in real time :)
+Bouncing DVD logo simulator, but multiplayer! Play with friends as a DVD logo, collide with others and create chaos in real time :)
 
-### Features:
+### Features
 - Real-time multiplayer
 - Custom nicknames and colors
 - Corner hit count
+- Chat
 - Fullscreen mode
 - Optional haptic feedback
-- Control player size, speed, etc. in config file
 
-### Play the game:
+### See them bounce ^_^
+https://github.com/user-attachments/assets/4aa90c89-0cff-40f9-8617-b333a8cb4f0f
 
+### Play the game
 <table>
   <tr>
     <td>Play on the main server</td>
-    <td>https://artezon.nya.pub/dvd</td>
+    <td><s>https://artezon.nya.pub/dvd</s> [server is offline, self-host instead]</td>
   </tr>
   <tr>
     <td>Play with haptic feedback on bounce</td>
-    <td>https://artezon.nya.pub/dvd?vibration=true</td>
+    <td><s>https://artezon.nya.pub/dvd?vibration=true</s></td>
   </tr>
   <tr>
     <td>My old pygame project (singleplayer)</td>
@@ -27,18 +29,17 @@ Have you ever stared at a DVD screensaver, waiting for that perfect corner bounc
   </tr>
 </table>
 
-### How to host your own server:
+### How to host your own server
 1. **Make sure you have `node` and `npm` installed**
 
-1. **Set up the environment file**<br>Rename `.env.example` to `.env`. You can edit this file to configure the server’s address and port.
+2. **Set up the environment**<br>Rename `.env.example` to `.env`. You can edit this file to configure the server’s address and port.
 
-1. **Install dependencies and build the project**<br>Run the following commands in your project directory:
+3. **Install dependencies**
    ```
    npm install
-   npm run build
    ```
 
-1. **Start the server**
+4. **Start the server**
    ```
-   npm run start
+   npm run prod
    ```
