@@ -39,25 +39,27 @@ input {
 }
 
 .left-panel {
-  flex: 1;
+  flex: 2;
   display: flex;
   flex-direction: column;
   gap: 20px;
   overflow-y: auto;
+  min-width: 480px;
 }
 
 .right-panel {
-  width: 300px;
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 400px;
 }
 
 .section {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 16px;
-  padding: 20px;
+  padding: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
@@ -66,13 +68,53 @@ body.hide-cursor {
   cursor: none;
 }
 
-@media (max-width: 1200px) {
-  .right-panel {
-    width: 250px;
-  }
+input[type="text"],
+input[type="color"] {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  transition: all 0.3s ease;
 }
 
-@media (max-width: 768px) {
+input[type="color"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+input[type="text"]:focus,
+input[type="color"]:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+input[type="text"]:disabled,
+input[type="color"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+input[type="text"]:hover:not(:disabled),
+input[type="color"]:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.pill {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (max-width: 860px) {
   html,
   body,
   #app {
@@ -81,6 +123,10 @@ body.hide-cursor {
 
   .container {
     flex-direction: column;
+  }
+
+  .left-panel {
+    min-width: unset;
   }
 
   .right-panel {

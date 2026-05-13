@@ -255,7 +255,7 @@ onUnmounted(() => {
   min-height: 150px;
   padding: 0;
   width: 100%;
-  height: 100%;
+  flex: 1;
 }
 
 .game-canvas {
@@ -271,7 +271,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   z-index: 10;
-  padding: 20px;
+  padding: 16px;
 }
 
 .overlay-element {
@@ -291,7 +291,7 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 860px) {
   .game-area {
     aspect-ratio: 16 / 9;
   }

@@ -1,8 +1,10 @@
 import { Player } from "./player.js";
+import type { ChatMessage } from "./types.js";
 
 export class Game {
   public players: Map<string, Player>;
   public messageToClients: { [key: string]: any };
+  public messages: ChatMessage[];
 
   constructor(
     public tickRate: number,
@@ -16,6 +18,7 @@ export class Game {
   ) {
     this.players = new Map<string, Player>();
     this.messageToClients = {};
+    this.messages = [];
   }
 
   public addPlayer(nickname: string, color: string): Player {
@@ -70,6 +73,19 @@ export class Game {
       this.messageToClients.players.push(player.sendData);
       player.sendData = {};
     }
+
+    if (this.messages.length > 0) {
+      this.messageToClients.messages = this.messages;
+      this.messages = [];
+    }
+  }
+
+  public addMessage(text: string): void {
+    this.messages.push({ timestamp: Date.now(), text });
+    if (this.messages.length > 500) {
+      this.messages.splice(0, this.messages.length - 500);
+    }
+    console.log(text);
   }
 
   private collide(a: Player, b: Player): void {

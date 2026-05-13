@@ -12,3 +12,8 @@ export type Point2D = {
   x: number;
   y: number;
 };
+
+export type ChatMessage = {
+  timestamp: number;
+  text: string;
+};

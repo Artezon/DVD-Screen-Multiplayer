@@ -33,9 +33,9 @@ function broadcast(clients: Map<string, Client>, excludeClientId: string | null,
   }
 }
 
-function cleanupClient(client: Client, clients: Map<string, Client>, game: Game) {
+export function cleanupClient(client: Client, clients: Map<string, Client>, game: Game) {
   if (client.playerId) {
-    game.removePlayer(client.playerId);
+    handlePlayerLeave(client, clients, game, client.ws);
   }
   clients.delete(client.id);
 }
@@ -120,14 +120,14 @@ function handlePlayerJoin(
     }),
   );
 
+  game.addMessage(`${receivedData.nickname} joined`);
+
   // Broadcast new player data to all other clients
   const newPlayerData = {
     type: "new_player",
     player: serializePlayer(player),
   };
   broadcast(clients, client.id, newPlayerData);
-
-  console.log(`${receivedData.nickname} joined tha game`);
 }
 
 function handlePlayerLeave(
@@ -138,7 +138,8 @@ function handlePlayerLeave(
 ) {
   // Convert player back to spectator
   if (client.playerId) {
-    console.log(`${game.players.get(client.playerId)?.nickname} left tha game`);
+    const nickname = game.players.get(client.playerId)?.nickname;
+    game.addMessage(`${nickname} left`);
 
     game.removePlayer(client.playerId);
 
@@ -161,6 +162,18 @@ function handlePlayerLeave(
   }
 }
 
+function handleChatMessage(receivedData: any, client: Client, game: Game) {
+  if (client.playerId) {
+    const player = game.players.get(client.playerId);
+    if (player && receivedData.message && typeof receivedData.message === "string") {
+      const text = receivedData.message.trim().substring(0, 1000);
+      if (text) {
+        game.addMessage(`${player.nickname}: ${text}`);
+      }
+    }
+  }
+}
+
 function handleNewColor(receivedData: any, client: Client, game: Game) {
   if (client.playerId) {
     const player = game.players.get(client.playerId);
@@ -168,7 +181,7 @@ function handleNewColor(receivedData: any, client: Client, game: Game) {
   }
 }
 
-function createGameWebSocketHandler(game: Game, clients: Map<string, Client>) {
+export function createGameWebSocketHandler(game: Game, clients: Map<string, Client>) {
   return function gameWebSocketHandler(ws: WebSocket, req: FastifyRequest) {
     const clientId = randomUUID();
     const client: Client = { id: clientId, ws: ws, isSpectator: true };
@@ -184,6 +197,9 @@ function createGameWebSocketHandler(game: Game, clients: Map<string, Client>) {
         }
         if (data.type === "leave") {
           handlePlayerLeave(client, clients, game, ws);
+        }
+        if (data.type === "chat") {
+          handleChatMessage(data, client, game);
         }
         if (data.type === "new_color") {
           handleNewColor(data, client, game);

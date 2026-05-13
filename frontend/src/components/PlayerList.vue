@@ -11,7 +11,7 @@ defineProps<{
   <div class="section player-list">
     <div class="player-list-header">
       <h3 class="player-list-title">Online</h3>
-      <div class="player-count">
+      <div class="player-count pill">
         {{ players.length }} player{{ players.length !== 1 ? "s" : "" }}
       </div>
     </div>
@@ -23,10 +23,8 @@ defineProps<{
         class="player-item"
         :class="{ 'own-player': player.id === myPlayerId }"
       >
-        <div class="player-header">
-          <div class="player-color" :style="{ backgroundColor: player.color }" />
-          <div class="player-name">{{ player.nickname }}</div>
-        </div>
+        <div class="player-color" :style="{ backgroundColor: player.color }" />
+        <div class="player-name">{{ player.nickname }}</div>
         <div class="player-hit-count">
           Corner hit count: <strong>{{ player.cornerHits || 0 }}</strong>
         </div>
@@ -46,7 +44,7 @@ defineProps<{
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .player-list-title {
@@ -54,18 +52,10 @@ defineProps<{
   font-weight: 600;
 }
 
-.player-count {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
 .player-list-content {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   overflow-y: auto;
   flex: 1;
 }
@@ -76,30 +66,20 @@ defineProps<{
   text-align: center;
 }
 
-@media (max-width: 768px) {
-  .no-players-msg {
-    padding: 25px 0;
-  }
-}
-
 .player-item {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  padding: 16px;
+  padding: 12px;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .player-item.own-player {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.5);
-}
-
-.player-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
 }
 
 .player-color {
@@ -121,6 +101,16 @@ defineProps<{
 .player-hit-count {
   font-size: 11px;
   opacity: 0.8;
-  margin-top: 8px;
+}
+
+@media (max-width: 860px) {
+  .no-players-msg {
+    padding: 25px 0;
+  }
+
+  .player-list {
+    min-height: 300px;
+    max-height: 300px;
+  }
 }
 </style>

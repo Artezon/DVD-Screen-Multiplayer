@@ -117,9 +117,17 @@ export class Player {
         this.pos.y <= this.board.cornerTolerance ||
         this.pos.y >= this.board.height - halfH - this.board.cornerTolerance
       ) {
-        console.log(`${this.nickname} hit the corner!`);
         this.cornerHits++;
         this.sendData.cornerHits = this.cornerHits;
+
+        const nearTop = this.pos.y <= this.board.cornerTolerance;
+        let cornerName: string;
+        if (this.pos.x < this.board.width / 2) {
+          cornerName = nearTop ? "top left" : "bottom left";
+        } else {
+          cornerName = nearTop ? "top right" : "bottom right";
+        }
+        this.board.addMessage(`${this.nickname} hit the ${cornerName} corner!`);
       }
     }
 

@@ -59,7 +59,7 @@ function handleColorInput() {
     <div class="controls-header">
       <h2 class="controls-title">Bouncing DVD Multiplayer</h2>
       <div class="connection-status" :class="connectionClass">{{ connectionText }}</div>
-      <div class="ping">Ping: {{ props.ping }}ms</div>
+      <div class="ping pill">Ping: {{ props.ping }}ms</div>
     </div>
 
     <div class="form-row">
@@ -116,7 +116,7 @@ function handleColorInput() {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .controls-title {
@@ -127,11 +127,6 @@ function handleColorInput() {
 
 .ping {
   margin-left: auto;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
 }
 
 .form-row {
@@ -165,43 +160,6 @@ label {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   opacity: 0.9;
-}
-
-input[type="text"],
-input[type="color"] {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 14px;
-  transition: all 0.3s ease;
-}
-
-input[type="color"] {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-input[type="text"]:focus,
-input[type="color"]:focus {
-  outline: none;
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.2);
-}
-
-input[type="text"]:disabled,
-input[type="color"]:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-input[type="text"]:hover:not(:disabled),
-input[type="color"]:hover:not(:disabled) {
-  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .button-row {

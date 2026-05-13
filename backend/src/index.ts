@@ -5,7 +5,7 @@ import fastifyWebsocket from "@fastify/websocket";
 import type { Client } from "./types.js";
 import config from "./config.js";
 import { Game } from "./game.js";
-import createGameWebSocketHandler from "./websocket.js";
+import { createGameWebSocketHandler, cleanupClient } from "./websocket.js";
 
 export function startGameLoop(game: Game, clients: Map<string, Client>): void {
   function gameLoop(): void {
@@ -14,22 +14,22 @@ export function startGameLoop(game: Game, clients: Map<string, Client>): void {
     last = now;
     game.update(dt);
 
-    for (const [clientId, client] of clients.entries()) {
+    const hasMessages = game.messageToClients.messages?.length > 0;
+
+    for (const [_, client] of clients.entries()) {
       // Clean up disconnected clients
       if (client.ws.readyState !== WebSocket.OPEN) {
-        clients.delete(clientId);
-        if (client.playerId) {
-          game.removePlayer(client.playerId);
-        }
+        cleanupClient(client, clients, game);
         continue;
       }
 
-      if (game.players.size > 0 || lastPlayerCount > 0) {
+      if (game.players.size > 0 || lastPlayerCount > 0 || hasMessages) {
         // Send updates to all connected clients (players and spectators)
         client.ws.send(JSON.stringify(game.messageToClients));
-        lastPlayerCount = game.players.size;
       }
     }
+
+    lastPlayerCount = game.players.size;
   }
 
   let last: number = Date.now();

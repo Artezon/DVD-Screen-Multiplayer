@@ -2,13 +2,14 @@
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import Controls from "./components/Controls.vue";
 import GameCanvas from "./components/GameCanvas.vue";
+import Chat from "./components/Chat.vue";
 import PlayerList from "./components/PlayerList.vue";
 import { useWebSocket } from "./composables/useWebSocket";
 import { useGameState } from "./composables/useGameState";
 import { usePlaytime } from "./composables/usePlaytime";
 import { showDialog } from "./composables/useDialog";
 import { generateRandomUser } from "./utils";
-import type { ServerMessage } from "./types";
+import type { ServerMessage, ChatMessage } from "./types";
 
 const { isConnected, connect, send, onMessage } = useWebSocket();
 const {
@@ -28,6 +29,7 @@ const {
 const { playtimeDisplay, start: startPlaytime, stop: stopPlaytime } = usePlaytime();
 
 const ping = ref(0);
+const chatMessages = ref<ChatMessage[]>([]);
 
 const nickname = ref("");
 const color = ref("#fff");
@@ -42,6 +44,10 @@ function leaveGame() {
 
 function changeColor() {
   send({ type: "new_color", color: color.value });
+}
+
+function sendChat(text: string) {
+  send({ type: "chat", message: text });
 }
 
 function handleMessage(data: ServerMessage) {
@@ -65,6 +71,14 @@ function handleMessage(data: ServerMessage) {
       break;
     case "state":
       handleStateUpdate(data.players);
+      if (data.messages) {
+        for (const msg of data.messages) {
+          chatMessages.value.push(msg);
+        }
+        if (chatMessages.value.length > 500) {
+          chatMessages.value.splice(0, chatMessages.value.length - 500);
+        }
+      }
       break;
     case "pong":
       ping.value = Date.now() - data.ts;
@@ -126,6 +140,12 @@ watch(isConnected, (connected) => {
       />
     </div>
     <div class="right-panel">
+      <Chat
+        :messages="chatMessages"
+        :is-player="isPlayer"
+        :players="sortedPlayersArray"
+        @send="sendChat"
+      />
       <PlayerList :players="sortedPlayersArray" :my-player-id="myPlayerId" />
     </div>
   </div>

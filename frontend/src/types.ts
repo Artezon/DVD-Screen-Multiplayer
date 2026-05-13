@@ -13,13 +13,18 @@ export interface Board {
   height: number;
 }
 
+export interface ChatMessage {
+  timestamp: number;
+  text: string;
+}
+
 export type ServerMessage =
   | { type: "spectator_init"; players: Player[]; board: Board }
   | { type: "player_init"; player: Player }
   | { type: "spectator_mode" }
   | { type: "new_player"; player: Player }
   | { type: "player_left"; playerId: string }
-  | { type: "state"; players: Player[] }
+  | { type: "state"; players: Player[]; messages?: ChatMessage[] }
   | { type: "pong"; ts: number }
   | { type: "error"; msg: string };
 
@@ -27,4 +32,5 @@ export type ClientMessage =
   | { type: "join"; nickname: string; color: string }
   | { type: "leave" }
   | { type: "new_color"; color: string }
+  | { type: "chat"; message: string }
   | { type: "ping"; ts: number };
