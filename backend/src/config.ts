@@ -10,7 +10,6 @@ const config = {
   playerHeight: 150,
   globalPlayerScale: 1,
   playerSpeed: 250,
-  cornerTolerance: 5,
 };
 
 export default config;

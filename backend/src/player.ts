@@ -104,41 +104,27 @@ export class Player {
   }
 
   public edge_collision(halfW: number, halfH: number): void {
-    if (this.pos.x < halfW || this.pos.x > this.board.width - halfW) {
+    const hitX = this.pos.x <= halfW || this.pos.x >= this.board.width - halfW;
+    const hitY = this.pos.y <= halfH || this.pos.y >= this.board.height - halfH;
+
+    if (hitX) {
       this.velocity.x *= -1;
-      if (this.pos.x < halfW) {
-        this.pos.x = halfW;
-      }
-      if (this.pos.x > this.board.width - halfW) {
-        this.pos.x = this.board.width - halfW;
-      }
-
-      if (
-        this.pos.y <= this.board.cornerTolerance ||
-        this.pos.y >= this.board.height - halfH - this.board.cornerTolerance
-      ) {
-        this.cornerHits++;
-        this.sendData.cornerHits = this.cornerHits;
-
-        const nearTop = this.pos.y <= this.board.cornerTolerance;
-        let cornerName: string;
-        if (this.pos.x < this.board.width / 2) {
-          cornerName = nearTop ? "top left" : "bottom left";
-        } else {
-          cornerName = nearTop ? "top right" : "bottom right";
-        }
-        this.board.addMessage(`${this.nickname} hit the ${cornerName} corner!`);
-      }
+      this.pos.x = Math.max(halfW, Math.min(this.pos.x, this.board.width - halfW));
     }
 
-    if (this.pos.y < halfH || this.pos.y > this.board.height - halfH) {
+    if (hitY) {
       this.velocity.y *= -1;
-      if (this.pos.y < halfH) {
-        this.pos.y = halfH;
-      }
-      if (this.pos.y > this.board.height - halfH) {
-        this.pos.y = this.board.height - halfH;
-      }
+      this.pos.y = Math.max(halfH, Math.min(this.pos.y, this.board.height - halfH));
+    }
+
+    if (hitX && hitY) {
+      this.cornerHits++;
+      this.sendData.cornerHits = this.cornerHits;
+
+      const left = this.pos.x < this.board.width / 2;
+      const top = this.pos.y < this.board.height / 2;
+      const cornerName = `${top ? "top" : "bottom"} ${left ? "left" : "right"}`;
+      this.board.addMessage(`${this.nickname} hit the ${cornerName} corner!`);
     }
   }
 }
