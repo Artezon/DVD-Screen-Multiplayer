@@ -1,21 +1,21 @@
 import { randomUUID } from "crypto";
-import { radians } from "../utils.js";
-import { Point2D } from "./point2d.js";
+import { radians } from "./utils.js";
+import type { Point2D } from "./types.js";
 import type { Game } from "./game.js";
 
 export class Player {
   public id: string;
   public board: Game;
   public nickname: string;
-  public _color: string;
   public pos: Point2D;
+  public velocity: Point2D;
+  public cornerHits: number;
+  public sendData: { [key: string]: any };
   private _angle: number;
   private _scale: number;
   private _size: Point2D;
   private _speed: number;
-  public cornerHits: number;
-  public velocity: Point2D;
-  public sendData: { [key: string]: any };
+  private _color: string;
 
   constructor(
     board: Game,
@@ -30,21 +30,21 @@ export class Player {
     this.id = randomUUID();
     this.board = board;
     this.nickname = nickname;
-    this._color = color;
+    this.pos = { x, y };
+    this.velocity = { x: 0, y: 0 };
+    this.cornerHits = 0;
     this.sendData = {};
-    this.pos = new Point2D(x, y);
-    this.velocity = new Point2D();
     this._angle = angle;
-    this._size = new Point2D();
     this._scale = 0;
+    this._size = { x: 0, y: 0 };
     this.scale = scale;
     this._speed = speed;
     this.speed = speed;
     this.angle = angle;
-    this.cornerHits = 0;
+    this._color = color;
   }
 
-  private setVelocity(): void {
+  private updateVelocity(): void {
     this.velocity.x = this._speed * Math.cos(radians(this._angle));
     this.velocity.y = this._speed * Math.sin(radians(this._angle));
   }
@@ -63,7 +63,7 @@ export class Player {
   public set speed(speed: number) {
     if (speed >= 0 && speed <= 1000) {
       this._speed = speed;
-      this.setVelocity();
+      this.updateVelocity();
     }
   }
 
@@ -72,7 +72,7 @@ export class Player {
   }
   public set angle(degrees: number) {
     this._angle = degrees % 360;
-    this.setVelocity();
+    this.updateVelocity();
   }
 
   public get scale() {
@@ -81,12 +81,8 @@ export class Player {
   public set scale(multiplier: number) {
     if (multiplier > 0 && multiplier <= 100) {
       this._scale = multiplier;
-      this._size.x =
-        this.board.basePlayerWidth * this.board.globalPlayerScale * this._scale;
-      this._size.y =
-        this.board.basePlayerHeight *
-        this.board.globalPlayerScale *
-        this._scale;
+      this._size.x = this.board.basePlayerWidth * this.board.globalPlayerScale * this._scale;
+      this._size.y = this.board.basePlayerHeight * this.board.globalPlayerScale * this._scale;
 
       this.sendData.size = this.size;
     }

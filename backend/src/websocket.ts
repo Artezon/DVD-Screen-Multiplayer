@@ -1,8 +1,9 @@
 import { randomUUID } from "crypto";
-import { FastifyRequest } from "fastify";
+import type { FastifyRequest } from "fastify";
 import WebSocket from "ws";
-import { Client } from "./client.js";
-import { Game, Player } from "./game/index.js";
+import type { Client } from "./types.js";
+import type { Game } from "./game.js";
+import type { Player } from "./player.js";
 
 function serializePlayer(player: Player) {
   return {
@@ -24,26 +25,15 @@ function getAllPlayersInfo(game: Game): any[] {
   return playersInfo;
 }
 
-function broadcast(
-  clients: Map<string, Client>,
-  excludeClientId: string | null,
-  object: any,
-) {
+function broadcast(clients: Map<string, Client>, excludeClientId: string | null, object: any) {
   for (const [otherClientId, otherClient] of clients.entries()) {
-    if (
-      otherClientId !== excludeClientId &&
-      otherClient.ws.readyState === WebSocket.OPEN
-    ) {
+    if (otherClientId !== excludeClientId && otherClient.ws.readyState === WebSocket.OPEN) {
       otherClient.ws.send(JSON.stringify(object));
     }
   }
 }
 
-function cleanupClient(
-  client: Client,
-  clients: Map<string, Client>,
-  game: Game,
-) {
+function cleanupClient(client: Client, clients: Map<string, Client>, game: Game) {
   if (client.playerId) {
     game.removePlayer(client.playerId);
   }
@@ -97,9 +87,7 @@ function handlePlayerJoin(
 
   // If nickname already exists
   if (
-    Array.from(game.players.values()).some(
-      (player) => player.nickname === receivedData.nickname,
-    )
+    Array.from(game.players.values()).some((player) => player.nickname === receivedData.nickname)
   ) {
     ws.send(
       JSON.stringify({
@@ -111,11 +99,11 @@ function handlePlayerJoin(
   }
 
   // If nickname is too long
-  if (receivedData.nickname.length > 128) {
+  if (receivedData.nickname.length > 32) {
     ws.send(
       JSON.stringify({
         type: "error",
-        msg: "Your nickname is too long!!",
+        msg: "Your nickname is too long",
       }),
     );
     return;
@@ -215,9 +203,7 @@ function createGameWebSocketHandler(game: Game, clients: Map<string, Client>) {
 
     ws.on("error", (error) => {
       cleanupClient(client, clients, game);
-      console.log(
-        `Client ${clientId} disconnected (WebSocket error: ${error})`,
-      );
+      console.log(`Client ${clientId} disconnected (WebSocket error: ${error})`);
     });
   };
 }

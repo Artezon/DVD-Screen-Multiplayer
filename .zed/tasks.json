@@ -1,0 +1,14 @@
+[
+  {
+    "label": "Run development server",
+    "command": "npm run dev",
+  },
+  {
+    "label": "Run production server",
+    "command": "npm run prod",
+  },
+  {
+    "label": "Format code",
+    "command": "npm run format",
+  },
+]

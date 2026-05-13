@@ -1,14 +1,11 @@
+import { resolve } from "path";
 import Fastify from "fastify";
 import fastifyStatic from "@fastify/static";
-import fastifyView from "@fastify/view";
 import fastifyWebsocket from "@fastify/websocket";
-import ejs from "ejs";
-import { projectRoot } from "./utils.js";
-import path from "path";
-import { Client } from "./client.js";
+import type { Client } from "./types.js";
 import config from "./config.js";
-import { Game } from "./game/index.js";
-import { createDvdRoutes } from "./routes.js";
+import { Game } from "./game.js";
+import createGameWebSocketHandler from "./websocket.js";
 
 export function startGameLoop(game: Game, clients: Map<string, Client>): void {
   function gameLoop(): void {
@@ -18,8 +15,8 @@ export function startGameLoop(game: Game, clients: Map<string, Client>): void {
     game.update(dt);
 
     for (const [clientId, client] of clients.entries()) {
+      // Clean up disconnected clients
       if (client.ws.readyState !== WebSocket.OPEN) {
-        // Clean up disconnected clients
         clients.delete(clientId);
         if (client.playerId) {
           game.removePlayer(client.playerId);
@@ -55,21 +52,28 @@ const clients = new Map<string, Client>(); // all connected clients (both player
 
 const fastify = Fastify({ logger: true });
 await fastify.register(fastifyStatic, {
-  root: path.join(projectRoot, "public"),
-  prefix: "/dvd/public/",
+  root: resolve(process.cwd(), "dist", "frontend"),
+  serve: false,
 });
-await fastify.register(fastifyView, {
-  engine: { ejs },
-  root: path.join(projectRoot, "views"),
+await fastify.register(fastifyStatic, {
+  root: resolve(process.cwd(), "dist", "frontend", "static"),
+  prefix: "/dvd/static",
+  decorateReply: false,
+});
+await fastify.register(fastifyStatic, {
+  root: resolve(process.cwd(), "dist", "frontend", "assets"),
+  prefix: "/dvd/assets/",
+  decorateReply: false,
 });
 await fastify.register(fastifyWebsocket);
-await fastify.register(createDvdRoutes(game, clients), { prefix: "/dvd" });
+
+fastify.get("/dvd", async (_, reply) => reply.sendFile("index.html"));
+fastify.get("/dvd/ws/game", { websocket: true }, createGameWebSocketHandler(game, clients));
 
 startGameLoop(game, clients);
 
 try {
   await fastify.listen({ host: config.host, port: config.port });
-  console.log(`Server running at http://${config.host}:${config.port}`);
 } catch (error) {
   console.error("Error starting server:", error);
   process.exit(1);

@@ -1,0 +1,89 @@
+:root {
+  --font-family:
+    "Nunito", -apple-system, BlinkMacSystemFont, "Adwaita Sans", "Inter", "Helvetica Neue", "Arial",
+    sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-family);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  background: linear-gradient(135deg, #1e1e2e 0%, #11111b 100%);
+  background-attachment: fixed;
+  color: #fff;
+}
+
+input {
+  color: #fff;
+}
+
+.container {
+  display: flex;
+  height: 100%;
+  gap: 20px;
+  padding: 20px;
+}
+
+.left-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.right-panel {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+body.hide-cursor {
+  cursor: none;
+}
+
+@media (max-width: 1200px) {
+  .right-panel {
+    width: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  html,
+  body,
+  #app {
+    height: unset;
+  }
+
+  .container {
+    flex-direction: column;
+  }
+
+  .right-panel {
+    width: 100%;
+  }
+}

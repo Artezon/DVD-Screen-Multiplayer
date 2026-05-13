@@ -19,14 +19,12 @@ export class Game {
   }
 
   public addPlayer(nickname: string, color: string): Player {
-    this.setGlobalPlayerScale(1 / (1 + 0.1 * this.players.size));
+    this.setGlobalPlayerScale(1 / (1 + 0.1 * (this.players.size + 1)));
 
     const w: number = this.basePlayerWidth * this.globalPlayerScale;
     const h: number = this.basePlayerHeight * this.globalPlayerScale;
-    const x: number =
-      this.width * 0.05 + w / 2 + Math.random() * (this.width * 0.9 - w / 2);
-    const y: number =
-      this.height * 0.05 + h / 2 + Math.random() * (this.height * 0.9 - h / 2);
+    const x: number = this.width * 0.05 + w / 2 + Math.random() * (this.width * 0.9 - w / 2);
+    const y: number = this.height * 0.05 + h / 2 + Math.random() * (this.height * 0.9 - h / 2);
     const angle: number = Math.floor(Math.random() * 4) * 90 + 45;
     const speed: number = this.defaultSpeed * (0.8 + Math.random() * 0.4);
 
