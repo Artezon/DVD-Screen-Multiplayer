@@ -28,11 +28,15 @@ const {
 } = useGameState();
 const { playtimeDisplay, start: startPlaytime, stop: stopPlaytime } = usePlaytime();
 
-const ping = ref(0);
+const ping = ref(-1);
 const chatMessages = ref<ChatMessage[]>([]);
 
 const nickname = ref("");
 const color = ref("#fff");
+
+let sendPingInterval: number | undefined = undefined;
+let updatePingInterval: number | undefined = undefined;
+let lastPing = -1;
 
 function joinGame() {
   send({ type: "join", nickname: nickname.value.trim(), color: color.value });
@@ -81,7 +85,7 @@ function handleMessage(data: ServerMessage) {
       }
       break;
     case "pong":
-      ping.value = Date.now() - data.ts;
+      lastPing = Math.floor(performance.now()) - data.ts;
       break;
     case "error":
       showDialog(data.msg);
@@ -89,7 +93,13 @@ function handleMessage(data: ServerMessage) {
   }
 }
 
-let pingInterval: number | null = null;
+function sendPing() {
+  if (isConnected.value) send({ type: "ping", ts: Math.floor(performance.now()) });
+}
+
+function updatePing() {
+  if (isConnected.value) ping.value = lastPing;
+}
 
 onMounted(() => {
   const user = generateRandomUser();
@@ -98,20 +108,26 @@ onMounted(() => {
 
   onMessage.value = handleMessage;
   connect();
-
-  pingInterval = window.setInterval(() => {
-    send({ type: "ping", ts: Date.now() });
-  }, 1000);
 });
 
 onUnmounted(() => {
-  if (pingInterval) clearInterval(pingInterval);
+  clearInterval(sendPingInterval);
+  clearInterval(updatePingInterval);
 });
 
 watch(isConnected, (connected) => {
-  if (!connected) {
+  if (connected) {
+    sendPing();
+    sendPingInterval = window.setInterval(sendPing, 1000);
+    updatePing();
+    updatePingInterval = window.setInterval(updatePing, 1000);
+  } else {
+    clearInterval(sendPingInterval);
+    clearInterval(updatePingInterval);
     stopPlaytime();
     handleDisconnect();
+    ping.value = -1;
+    lastPing = -1;
   }
 });
 </script>

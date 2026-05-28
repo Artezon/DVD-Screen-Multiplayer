@@ -9,7 +9,7 @@ import { createGameWebSocketHandler, cleanupClient } from "./websocket.js";
 
 export function startGameLoop(game: Game, clients: Map<string, Client>): void {
   function gameLoop(): void {
-    const now: number = Date.now();
+    const now: number = performance.now();
     const dt: number = (now - last) / 1000;
     last = now;
     game.update(dt);
@@ -32,7 +32,7 @@ export function startGameLoop(game: Game, clients: Map<string, Client>): void {
     lastPlayerCount = game.players.size;
   }
 
-  let last: number = Date.now();
+  let last: number = performance.now();
   let lastPlayerCount: number = 0;
   setInterval(gameLoop, 1000 / game.tickRate);
 }

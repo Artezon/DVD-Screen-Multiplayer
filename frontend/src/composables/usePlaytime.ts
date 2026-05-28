@@ -7,16 +7,14 @@ export function usePlaytime() {
   const playtimeInterval = ref<number | null>(null);
 
   function start() {
-    playtimeStart.value = performance.now();
+    playtimeStart.value = Math.floor(performance.now());
     playtimeDisplay.value = formatTime(0);
 
     const tick = () => {
       if (!playtimeStart.value) return;
-      playtimeDisplay.value = formatTime(performance.now() - playtimeStart.value);
-
-      const elapsed = performance.now() - playtimeStart.value;
-      const nextTick = 1000 - (elapsed % 1000);
-      playtimeInterval.value = window.setTimeout(tick, nextTick);
+      const elapsed = Math.floor(performance.now()) - playtimeStart.value;
+      playtimeDisplay.value = formatTime(elapsed);
+      playtimeInterval.value = window.setTimeout(tick, 1000 - (elapsed % 1000));
     };
 
     playtimeInterval.value = window.setInterval(tick, 1000);

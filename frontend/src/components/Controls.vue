@@ -59,7 +59,7 @@ function handleColorInput() {
     <div class="controls-header">
       <h2 class="controls-title">Bouncing DVD Multiplayer</h2>
       <div class="connection-status" :class="connectionClass">{{ connectionText }}</div>
-      <div class="ping pill">Ping: {{ props.ping }}ms</div>
+      <div v-if="props.ping !== -1" class="ping pill">Ping: {{ props.ping }}ms</div>
     </div>
 
     <div class="form-row">
